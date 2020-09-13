@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 
@@ -6,8 +6,8 @@ CheckExists() {
     command_to_run=$1
     error_message=$2
         
-    if ! $($command_to_run &> /dev/null); then
-        printf "$error_message\n"
+    if ! eval "$command_to_run" &> /dev/null; then
+        printf "%s\n" "$error_message"
         exit
     fi
 }
@@ -75,16 +75,16 @@ if [ "$split" == "n" ]; then
     repo_path="https://github.com/zmkfirmware/zmk-config-template.git"
 fi
 
-read -e -p "Copy in the stock keymap for customization? [Yn]: " copy_keymap
+read -r -e -p "Copy in the stock keymap for customization? [Yn]: " copy_keymap
 
 if [ -z "$copy_keymap" ] || [ "$copy_keymap" == "Y" ] || [ "$copy_keymap" == "y" ]; then copy_keymap="yes"; fi
 
-read -e -p "GitHub Username (leave empty to skip GitHub repo creation): " github_user
+read -r -e -p "GitHub Username (leave empty to skip GitHub repo creation): " github_user
 if [ -n "$github_user" ]; then
-    read -p "GitHub Repo Name [zmk-config]: " repo_name
+    read -r -p "GitHub Repo Name [zmk-config]: " repo_name
     if [ -z "$repo_name" ]; then repo_name="zmk-config"; fi
 
-    read -p "GitHub Repo [https://github.com/${github_user}/${repo_name}.git]: " github_repo
+    read -r -p "GitHub Repo [https://github.com/${github_user}/${repo_name}.git]: " github_repo
 
     if [ -z "$github_repo" ]; then github_repo="https://github.com/${github_user}/${repo_name}.git"; fi
 else
@@ -107,7 +107,7 @@ if [ -n "$github_repo" ]; then
 fi
 
 echo ""
-read -p "Continue? [Yn]: " do_it
+read -r -p "Continue? [Yn]: " do_it
 
 if [ -n "$do_it" ] && [ "$do_it" != "y" ] && [ "$do_it" != "Y" ]; then
     echo "Aborting..."
@@ -147,7 +147,7 @@ git commit -m "Initial User Config."
 
 if [ -n "$github_repo" ]; then
     git remote add origin "$github_repo"
-    git push --set-upstream origin $(git symbolic-ref --short HEAD)
+    git push --set-upstream origin "$(git symbolic-ref --short HEAD)"
 
     # TODO: Support determing the actions URL when non-https:// repo URL is used.
     if [ "${github_repo}" != "${github_repo#https://}" ]; then

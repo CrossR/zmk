@@ -1,6 +1,6 @@
 $ErrorActionPreference = "Stop"
 
-function Selection-Menu {
+function Get-Choice-From-Options {
     param(
         [String[]] $Options,
         [String] $Prompt
@@ -17,10 +17,12 @@ function Selection-Menu {
         if ($selection -eq $Options.length + 1) {
             Write-Host "Goodbye!"
             exit
-        } elseif ($selection -le $Options.length) {
+        }
+        elseif ($selection -le $Options.length) {
             $choice = $($selection - 1)
             break
-        } else {
+        }
+        else {
             Write-Host "Invalid Option. Try another one."
         }
     }
@@ -28,7 +30,7 @@ function Selection-Menu {
     return $choice
 }
 
-function Check-Git-Config {
+function Test-Git-Config {
     param(
         [String] $Option,
         [String] $ErrMsg
@@ -44,26 +46,28 @@ function Check-Git-Config {
 
 try {
     git | Out-Null
-} catch [System.Management.Automation.CommandNotFoundException] {
+}
+catch [System.Management.Automation.CommandNotFoundException] {
     Write-Host "Git is not installed, and is required for this script!"
     exit
 }
 
-Check-Git-Config -Option "user.name" -ErrMsg "Git username not set!`nRun: git config --global user.name 'My Name'"
-Check-Git-Config -Option "user.email" -ErrMsg "Git email not set!`nRun: git config --global user.name 'example@myemail.com'"
+Test-Git-Config -Option "user.name" -ErrMsg "Git username not set!`nRun: git config --global user.name 'My Name'"
+Test-Git-Config -Option "user.email" -ErrMsg "Git email not set!`nRun: git config --global user.name 'example@myemail.com'"
 
 $repo_path = "https://github.com/zmkfirmware/zmk-config-split-template.git"
 
 $title = "ZMK Config Setup:"
 $prompt = "Pick an MCU board"
 $options = "nice!nano", "QMK Proton-C", "BlueMicro840 (v1)"
+$boards = "nice_nano", "proton_c", "bluemicro840_v1"
 
 Write-Host "$title"
 Write-Host ""
 Write-Host "MCU Board Selection:"
 
-$choice = Selection-Menu -Options $options -Prompt $prompt
-$board = $($options[$choice])
+$choice = Get-Choice-From-Options -Options $options -Prompt $prompt
+$board = $($boards[$choice])
 
 Write-Host ""
 Write-Host "Keyboard Shield Selection:"
@@ -74,7 +78,7 @@ $options = "Kyria", "Lily58", "Corne", "Splitreus62", "Sofle", "Iris", "RoMac"
 $names = "kyria", "lily58", "corne", "splitreus62", "sofle", "iris", "romac"
 $splits = "y", "y", "y", "y", "y", "y", "n"
 
-$choice = Selection-Menu -Options $options -Prompt $prompt
+$choice = Get-Choice-From-Options -Options $options -Prompt $prompt
 $shield_title = $($options[$choice])
 $shield = $($names[$choice])
 $split = $($splits[$choice])
@@ -103,8 +107,10 @@ if ($github_user -ne "") {
     if ($github_repo -eq "") {
         $github_repo = "https://github.com/$github_user/$repo_name.git"
     }
-} else {
+}
+else {
     $repo_name = "zmk-config"
+    $github_repo = ""
 }
 
 Write-Host ""
@@ -114,7 +120,8 @@ Write-Host "* Shield: ${shield}"
 
 if ($copy_keymap -eq "yes") {
     Write-Host "* Copy Keymap?: Yes"
-} else {
+}
+else {
     Write-Host "* Copy Keymap?: No"
 }
 
@@ -131,9 +138,9 @@ if ($do_it -ne "" -and $do_it -ne "Y" -and $do_it -ne "y") {
 }
 
 git clone --single-branch "$repo_path" "$repo_name"
-cd "$repo_name"
+Set-Location "$repo_name"
 
-pushd config
+Push-Location config
 
 Invoke-RestMethod -Uri "https://raw.githubusercontent.com/zmkfirmware/zmk/main/app/boards/shields/${shield}/${shield}.conf" -OutFile "${shield}.conf"
 
@@ -141,7 +148,7 @@ if ($copy_keymap -eq "yes") {
     Invoke-RestMethod -Uri "https://raw.githubusercontent.com/zmkfirmware/zmk/main/app/boards/shields/${shield}/${shield}.keymap" -OutFile "${shield}.keymap"
 }
 
-popd
+Pop-Location
 
 $build_file = (Get-Content .github/workflows/build.yml).replace("BOARD_NAME", $board)
 $build_file = $build_file.replace("SHIELD_NAME", $shield)
