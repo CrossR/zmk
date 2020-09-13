@@ -141,6 +141,6 @@ if [ -n "$github_repo" ]; then
 
     # TODO: Support determing the actions URL when non-https:// repo URL is used.
     if [ "${github_repo}" != "${github_repo#https://}" ]; then
-        echo "Your firmware should be available from the GitHub Actions shortly: ${github_url%.git}/actions"
+        echo "Your firmware should be available from the GitHub Actions shortly: ${github_repo%.git}/actions"
     fi
 fi
