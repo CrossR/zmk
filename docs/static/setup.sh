@@ -2,12 +2,19 @@
 
 set -e
 
+if ! command -v git &> /dev/null; then
+    echo "git is not installed, and is required for this script!"
+    exit
+fi
+
+if ! command -v curl &> /dev/null; then
+    echo "curl is not installed, and is required for this script!"
+    exit
+fi
+
 repo_path="https://github.com/zmkfirmware/zmk-config-split-template.git"
 title="ZMK Config Setup:"
 
-
-# TODO: Check for git being installed
-# TODO: Check for curl being installed
 # TODO: Check for user.name and user.email git configs being set
 
 prompt="Pick an MCU board:"
@@ -73,35 +80,37 @@ if [ -z "$copy_keymap" ] || [ "$copy_keymap" == "Y" ] || [ "$copy_keymap" == "y"
 
 read -e -p "GitHub Username (leave empty to skip GitHub repo creation): " github_user
 if [ -n "$github_user" ]; then
-	read -p "GitHub Repo Name [zmk-config]: " repo_name
-	if [ -z "$repo_name" ]; then repo_name="zmk-config"; fi
+    read -p "GitHub Repo Name [zmk-config]: " repo_name
+    if [ -z "$repo_name" ]; then repo_name="zmk-config"; fi
 
-	read -p "GitHub Repo [https://github.com/${github_user}/${repo_name}.git]: " github_repo
+    read -p "GitHub Repo [https://github.com/${github_user}/${repo_name}.git]: " github_repo
 
-	if [ -z "$github_repo" ]; then github_repo="https://github.com/${github_user}/${repo_name}.git"; fi
+    if [ -z "$github_repo" ]; then github_repo="https://github.com/${github_user}/${repo_name}.git"; fi
 else
-	repo_name="zmk-config"
+    repo_name="zmk-config"
 fi
 
 echo ""
 echo "Preparing a user config for:"
 echo "* MCU Board: ${board}"
 echo "* Shield: ${shield}"
+
 if [ "$copy_keymap" == "yes" ]; then
     echo "* Copy Keymap?: ✓"
 else
     echo "* Copy Keymap?: ❌"
 fi
+
 if [ -n "$github_repo" ]; then
-	echo "* GitHub Repo To Push (please create this in GH first!): ${github_repo}"
+    echo "* GitHub Repo To Push (please create this in GH first!): ${github_repo}"
 fi
 
 echo ""
 read -p "Continue? [Yn]: " do_it
 
 if [ -n "$do_it" ] && [ "$do_it" != "y" ] && [ "$do_it" != "Y" ]; then
-	echo "Aborting..."
-	exit
+    echo "Aborting..."
+    exit
 fi
 
 git clone --single-branch $repo_path ${repo_name}
@@ -118,10 +127,10 @@ fi
 popd
 
 sed -i'.orig' \
-	-e "s/BOARD_NAME/$board/" \
-	-e "s/SHIELD_NAME/$shield/" \
-	-e "s/KEYBOARD_TITLE/$shield_title/" \
-	.github/workflows/build.yml
+    -e "s/BOARD_NAME/$board/" \
+    -e "s/SHIELD_NAME/$shield/" \
+    -e "s/KEYBOARD_TITLE/$shield_title/" \
+    .github/workflows/build.yml
 
 if [ "$board" == "proton_c" ]; then
     # Proton-C board still fa
@@ -136,8 +145,8 @@ git add .
 git commit -m "Initial User Config."
 
 if [ -n "$github_repo" ]; then
-	git remote add origin "$github_repo"
-	git push --set-upstream origin $(git symbolic-ref --short HEAD)
+    git remote add origin "$github_repo"
+    git push --set-upstream origin $(git symbolic-ref --short HEAD)
 
     # TODO: Support determing the actions URL when non-https:// repo URL is used.
     if [ "${github_repo}" != "${github_repo#https://}" ]; then

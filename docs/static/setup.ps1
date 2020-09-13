@@ -29,6 +29,13 @@ function Selection-Menu
     return $choice
 }
 
+try {
+    git | Out-Null
+} catch [System.Management.Automation.CommandNotFoundException] {
+    Write-Host "Git is not installed, and is required for this script!"
+    exit
+}
+
 $repo_path = "https://github.com/zmkfirmware/zmk-config-split-template.git"
 
 $title = "ZMK Config Setup:"
