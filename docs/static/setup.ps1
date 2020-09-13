@@ -1,7 +1,6 @@
 $ErrorActionPreference = "Stop"
 
-function Selection-Menu
-{
+function Selection-Menu {
     param(
         [String[]] $Options,
         [String] $Prompt
@@ -29,12 +28,29 @@ function Selection-Menu
     return $choice
 }
 
+function Check-Git-Config {
+    param(
+        [String] $Option,
+        [String] $ErrMsg
+    )
+
+    git config $Option | Out-Null
+
+    if ($lastExitCode -ne 0) {
+        Write-Host $ErrMsg
+        exit
+    }
+}
+
 try {
     git | Out-Null
 } catch [System.Management.Automation.CommandNotFoundException] {
     Write-Host "Git is not installed, and is required for this script!"
     exit
 }
+
+Check-Git-Config -Option "user.name" -ErrMsg "Git username not set!`nRun: git config --global user.name 'My Name'"
+Check-Git-Config -Option "user.email" -ErrMsg "Git email not set!`nRun: git config --global user.name 'example@myemail.com'"
 
 $repo_path = "https://github.com/zmkfirmware/zmk-config-split-template.git"
 
@@ -53,6 +69,7 @@ Write-Host ""
 Write-Host "Keyboard Shield Selection:"
 $prompt = "Pick a keyboard"
 
+# TODO: Add support for "Other" and linking to docs on adding custom shields in user config repos.
 $options = "Kyria", "Lily58", "Corne", "Splitreus62", "Sofle", "Iris", "RoMac"
 $names = "kyria", "lily58", "corne", "splitreus62", "sofle", "iris", "romac"
 $splits = "y", "y", "y", "y", "y", "y", "n"

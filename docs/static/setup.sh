@@ -2,20 +2,24 @@
 
 set -e
 
-if ! command -v git &> /dev/null; then
-    echo "git is not installed, and is required for this script!"
-    exit
-fi
+CheckExists() {
+    command_to_run=$1
+    error_message=$2
+        
+    if ! $($command_to_run &> /dev/null); then
+        printf "$error_message\n"
+        exit
+    fi
+}
 
-if ! command -v curl &> /dev/null; then
-    echo "curl is not installed, and is required for this script!"
-    exit
-fi
+CheckExists "command -v git" "git is not installed, and is required for this script!"
+CheckExists "command -v curl" "curl is not installed, and is required for this script!"
+
+CheckExists "git config user.name" "Git username not set!\nRun: git config --global user.name 'My Name'"
+CheckExists "git config user.email" "Git email not set!\nRun: git config --global user.email 'example@myemail.com'"
 
 repo_path="https://github.com/zmkfirmware/zmk-config-split-template.git"
 title="ZMK Config Setup:"
-
-# TODO: Check for user.name and user.email git configs being set
 
 prompt="Pick an MCU board:"
 options=("nice!nano" "QMK Proton-C" "BlueMicro840 (v1)")
@@ -37,9 +41,6 @@ select opt in "${options[@]}" "Quit"; do
 
     esac
 done
-
-#read -p "Is this board a complete keyboard [yN]: " complete
-#echo "$complete"
 
 echo ""
 echo "Keyboard Shield Selection:"
