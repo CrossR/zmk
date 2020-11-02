@@ -10,6 +10,8 @@
 #include <usb/class/usb_hid.h>
 
 #include <zmk/keys.h>
+#include <zmk/hid_usage.h>
+#include <zmk/hid_usage_pages.h>
 
 #define COLLECTION_REPORT 0x03
 
@@ -20,19 +22,19 @@
 static const u8_t zmk_hid_report_desc[] = {
     /* USAGE_PAGE (Generic Desktop) */
     HID_GI_USAGE_PAGE,
-    USAGE_GEN_DESKTOP,
+    HID_USAGE_GD,
     /* USAGE (Keyboard) */
     HID_LI_USAGE,
-    USAGE_GEN_DESKTOP_KEYBOARD,
+    HID_USAGE_GD_KEYBOARD,
     /* COLLECTION (Application) */
     HID_MI_COLLECTION,
     COLLECTION_APPLICATION,
     /* REPORT ID (1) */
     HID_GI_REPORT_ID,
     0x01,
-    /* USAGE_PAGE (Keypad) */
+    /* USAGE_PAGE (Keyboard/Keypad) */
     HID_GI_USAGE_PAGE,
-    USAGE_GEN_DESKTOP_KEYPAD,
+    HID_USAGE_KEY,
     /* USAGE_MINIMUM (Keyboard LeftControl) */
     HID_LI_USAGE_MIN(1),
     0xE0,
@@ -56,9 +58,9 @@ static const u8_t zmk_hid_report_desc[] = {
     HID_MI_INPUT,
     0x02,
 
-    /* USAGE_PAGE (Keypad) */
+    /* USAGE_PAGE (Keyboard/Keypad) */
     HID_GI_USAGE_PAGE,
-    USAGE_GEN_DESKTOP_KEYPAD,
+    HID_USAGE_KEY,
     /* REPORT_SIZE (8) */
     HID_GI_REPORT_SIZE,
     0x08,
@@ -69,9 +71,9 @@ static const u8_t zmk_hid_report_desc[] = {
     HID_MI_INPUT,
     0x03,
 
-    /* USAGE_PAGE (Keypad) */
+    /* USAGE_PAGE (Keyboard/Keypad) */
     HID_GI_USAGE_PAGE,
-    USAGE_GEN_DESKTOP_KEYPAD,
+    HID_USAGE_KEY,
     /* LOGICAL_MINIMUM (0) */
     HID_GI_LOGICAL_MIN(1),
     0x00,
@@ -98,7 +100,7 @@ static const u8_t zmk_hid_report_desc[] = {
     HID_MI_COLLECTION_END,
     /* USAGE_PAGE (Consumer) */
     HID_GI_USAGE_PAGE,
-    0x0C,
+    HID_USAGE_CONSUMER,
     /* USAGE (Consumer Control) */
     HID_LI_USAGE,
     0x01,
@@ -110,22 +112,24 @@ static const u8_t zmk_hid_report_desc[] = {
     0x02,
     /* USAGE_PAGE (Consumer) */
     HID_GI_USAGE_PAGE,
-    0x0C,
+    HID_USAGE_CONSUMER,
     /* LOGICAL_MINIMUM (0) */
     HID_GI_LOGICAL_MIN(1),
     0x00,
-    /* LOGICAL_MAXIMUM (1) */
-    HID_GI_LOGICAL_MAX(1),
+    /* LOGICAL_MAXIMUM (0xFFFF) */
+    HID_GI_LOGICAL_MAX(2),
+    0xFF,
     0xFF,
     HID_LI_USAGE_MIN(1),
     0x00,
-    /* USAGE_MAXIMUM (Keyboard Application) */
-    HID_LI_USAGE_MAX(1),
+    /* USAGE_MAXIMUM (0xFFFF) */
+    HID_LI_USAGE_MAX(2),
+    0xFF,
     0xFF,
     /* INPUT (Data,Ary,Abs) */
-    /* REPORT_SIZE (8) */
+    /* REPORT_SIZE (16) */
     HID_GI_REPORT_SIZE,
-    0x08,
+    0x10,
     /* REPORT_COUNT (ZMK_HID_CONSUMER_NKRO_SIZE) */
     HID_GI_REPORT_COUNT,
     ZMK_HID_CONSUMER_NKRO_SIZE,
@@ -154,7 +158,7 @@ struct zmk_hid_keypad_report {
 } __packed;
 
 struct zmk_hid_consumer_report_body {
-    u8_t keys[ZMK_HID_CONSUMER_NKRO_SIZE];
+    u16_t keys[ZMK_HID_CONSUMER_NKRO_SIZE];
 } __packed;
 
 struct zmk_hid_consumer_report {
